@@ -12,7 +12,9 @@ Key Insights :
 ~71% accounts fall into low recovery probability (90+ DPD)
 ₹866M total outstanding amount
 ₹652M concentrated in medium recovery segment (highest opportunity)
-Even customers with good history showed low recovery probability
+Even customers with good history showed low recovery probability.
+
+
 Approach : 
 1. Segmentation
 Accounts were segmented into:
