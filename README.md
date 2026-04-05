@@ -35,20 +35,25 @@ Low: Field visits and legal action
 4. Resource Optimization
 Expensive actions (legal/field) reserved for high-risk accounts
 Soft channels used for recoverable segments
+
 Dashboard :
 Built an interactive Power BI dashboard to:
 Track recovery rates
 Segment accounts dynamically
 Support decision-making
-💡 Business Impact
+
+Business Impact :
 Focus on ₹652M segment → highest ROI potential
 Prevent transition to NPAs
 Even a 5% improvement can significantly increase recovery
+
  AI Applications (Conceptual) : 
 Predict recovery likelihood using historical data
 Recommend next-best action
 Automate follow-ups using AI agents
 Generate personalized communication strategies
+
+
 Tools Used : 
 SQL
 Power BI
