@@ -2,6 +2,8 @@
 Data analytics project to optimize loan recovery using segmentation and scoring. Built a Power BI dashboard and rule-based strategy using DPD, payment behavior, and customer data to prioritize accounts and improve recovery outcomes.
 This project focuses on improving recovery rates for non-performing loans (NPLs) by applying data-driven analysis and prioritization strategies.
 The goal was to identify high-impact factors affecting recovery and design an efficient approach to maximize collections.
+
+
 Problem Statement :
 Financial institutions often struggle to recover outstanding amounts efficiently due to:
 Lack of prioritization
