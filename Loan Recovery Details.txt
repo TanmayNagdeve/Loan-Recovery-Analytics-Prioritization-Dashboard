@@ -1,0 +1,181 @@
+Loan Recovery Details:
+ account id
+ loan amount
+ outstanding amount
+ days past due
+ last contact channel (Call / Field / Legal / None)
+ last contact outcome (Paid / Promised / No Response / Refused)
+ recovery amount (₹ recovered so far)
+ assigned channel (call/Field/Legal)
+ num contact attempts
+
+Customer Details:
+ customer location (city tier: Tier 1 / 2 / 3)
+ customer income band (Low / Medium / High)
+ previous payment History (Good / Average / Poor)
+
+KEY FACTORS In deciding which factors to choose which leads to high recovery likelihood :
+
+Outstanding amount ---- Major Driver
+days past due------- Major Driver
+last contact outcome (Paid / Promised / No Response / Refused)---- High Impact on recovery
+assigned channel (call/Field/Legal) --- Depends on Last contact outcome
+previous payment history (Good / Average / Poor) -- For separating good and average customers for soft reminders and Poor  customers for harder push ( field visit or legal actions)
+customer income band  (Low / Medium / High) -- Medium Driver
+customer location (city tier: Tier 1 / 2 / 3) -- If field visit is required then this will help to optimize travel routes for the agents
+last contact channel (Call / Field / Legal / None) -- next actions will depend on this
+
+### Task 1: Exploratory Analysis --------------------------------------------------------------------------------------------------------------------------------------------------
+
+Initially I created buckets based on the historical data which was 'previous payment history' but upon further research got to know something interesting about the Days_Past_Due. There's a rule about DPDs, according to which, a loan is classified as NPA once it has been overdue for more than 90 days. So, I thought why not do the segmentation based on DPDs and hence I created three buckets based on DPDs : High, Medium and Low, and guess what even the accounts which were considered as GOOD in the past were in LOW probability zone, which required aggressive actions to recover.
+
+
+Hence, for a basic understanding of the data, I created a Dashboard in PowerBI which shows the accounts segmentation based on DPDs and other key factors being used as filters. A card visual to show the total outstanding amount and another card visual for displaying the recovery rate.
+
+KEY INSIGHTS FROM THE DASHBOARD :
+
+1. 71% accounts of the 10k accounts comes under the low probability zone, which means they require aggressive actions both legal and field visits.
+2. Only 7% accounts of the 10k accounts are highly recoverable which could most probably be recovered with SMS/ WhatsApp/ calls as soft reminders.
+3. The 21% of accounts in the medium bucket needs immediate consideration as well, as they may get converted to low probability zone.
+4. One more important thing to notice, even the accounts which were marked as GOOD (2918 accounts), 71% of these accounts are in low recovery probability zone which again needs aggressive actions.
+5. Overall the outstanding amount comes around to be 866M with 13% recovery rate.
+
+
+### Task 2: Strategy Design ---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+----- Account Prioritization & assigning the most effective channel.
+
+As per the Exploratory Analysis Done, It's clear that 71% of the accounts are in low recovery probability zone which also means that these accounts have DPD more than 90 and reaching towards the count of 300.
+
+1. Account Prioritization.
+
+--HIGH PRIORITY : Accounts With High DPD count (90+) & High Outstanding Amount because of High Risk + High money to be recovered.
+--MEDIUM PRIORITY : Accounts in the medium recovery probability zone (31-90 Days) to avoid them getting converted to NPAs.
+--LOW PRIORITY : Accounts in the high recovery probability zone(1-30 days) recoverable with soft nudges like SMS/ whatsapp
+
+2. Channel Assignment.
+
+-- The Three Segments are as follows :
+
+High Recovery Probability (1 - 30 Days) --> channel :  SMS / WhatsApp / Regular Follow-up
+Medium Recovery Probability (31 - 90 Days) --> channel : Call / Field Visit to avoid them getting converted to NPAs.
+Low Recovery Probability (90+ Days) --> channel : aggressive action : Field visit/ Legal action
+
+If last_contact_outcome : No Response : call / SMS / WhatsApp / Regular Follow-up
+                          Paid : Low Priority/ close
+                          Promised : call / Field visit
+                          Refused : Field Visit / Legal Action (Aggressive)
+
+If previous_payment_history : Good : approach can be much softer
+                              Poor : Firmer and assertive approach earlier
+
+## Resource Optimization
+Agents being limited and legal actions being costly, hence the resources need to be utilized only for Accounts With High DPD count (90+), High Outstanding Amount and where the attempt to contact has failed or has been refused by the borrower.
+
+### Task 3: Scoring Logic ----------------------------------------------------------------------------------------------------------------------------------------------
+
+Assuming The four high impact factors for recovery : DPD, last_contact_outcome, previous_payment_history and customer_income_band.
+
+Ranking and weightage of the four factors based on their impact on Recovery :
+
+DPD (40%)
+last_contact_outcome (20%)
+previous_payment_history (20%)
+customer_income_band (20%)
+
+
+Scoring Logic :
+
+High Probability of Recovery --> DPD lOW; last_contact - paid, promised; previous_history - good, average; customer_income_band - High, Medium
+
+Low Probability of Recovery --> DPD High; last_contact - No Response, Refused; previous_history - Poor; customer_income_band - Low 
+
+Rule : Higher Score = Higher Probability of Recovery :: Any aspect that improves recovery --> Higher Score
+
+
+## ONLY FOR CONCEPTUAL UNDERSTANDING
+
+DPD :
+ High (90+) --> 0-15 
+ Medium (31-90 days) --> 16-25
+ low (0-31 days) --> 26 - 40
+
+last_contact_outcome:
+	No Response --> 6-10
+        Paid --> 16-20
+        Promised -->11-15
+        Refused --> 0-5
+
+previous_payment_history:
+  	Average --> 6-15
+        Good --> 16-20
+        Poor --> 0-5
+
+customer_income_band:
+	High --> 16-20
+        Low --> 0-5
+        Medium --> 6-15
+
+## NOW FOR ACTUAL SCORING OF EACH ACCOUNT, THE VALUES HAVE TO BE FIXED, SO THAT IT COULD BE USED IN THE SYSTEM (PROBABLY AS A CALCULATED COLUMN IN THE DASHBOARD)
+
+DPD :
+ High (90+) --> 10
+ Medium (31-90 days) --> 25
+ low (0-31 days) --> 40
+
+last_contact_outcome:
+	No Response --> 10
+        Paid --> 20
+        Promised --> 15
+        Refused --> 5
+
+previous_payment_history:
+  	Average --> 15
+        Good --> 20
+        Poor --> 5
+
+customer_income_band:
+	High --> 20
+        Low --> 5
+        Medium --> 15
+
+## SCORE BANDS
+
+70 - 100 --> High Recovery 
+40 - 70 --> Medium Recovery
+<40 --> LOW
+
+## CONCLUSION FOR TASK 3 : Higher Band score means Higher likelihood of recovery while the accounts with lower scores indicate accounts which needs aggressive recovery actions.
+
+### Task 4: Business Impact ----------------------------------------------------------------------------------------------------------------------------------------------
+
+1. Analysis reveals that most of the outstanding money is held in the Medium Recovery segment and hence it holds the highest potential. On the other hand the low recovery segment holds the highest NPAs with a recovery rate of 4.5% only. Both the segments are high priority ones, with the low recovery segment needing aggressive legal actions and field visits especially the accounts with last_contact_outcome as refused and no response. And for the accounts with status as "Promised" should be led with consistent call follow-ups.
+
+2. When it comes to the resource optimization for the High Priority accounts as mentioned above, the accounts can be filtered to the last_contact_outcome status as "Refused" and "No Response" and only for such high-value accounts the legal actions and field visits should be reserved. For other last_contact_outcome statuses, the primary channels should be calls/SMS/WhatsApp.
+
+3. As per the analysis, Medium Recovery and Low Recovery segments have the recovery rate as 13% and 4.5% respectively. The recovery rate can be improvised by converting the Medium Recovery accounts to High Recovery ones before they become Low Recovery accounts. And by taking intense actions (legal/ field visits) for the low recovery accounts.
+
+4. Overall the Scoring logic (DPD + outcome + history + income) led to the segmentation of accounts based on four effective factors rather than just relying on DPD, eventually leading to more accurate segmentation and better decision making.
+
+### Task 5 : AI APPLICATION ----------------------------------------------------------------------------------------------------------------------------------------------
+
+1. AI can analyze historical recovery data and can identify the most effective factors for high recovery which can lead to effective segmentation of the accounts.
+2. AI can rank the accounts as per high priority and suggest next best action.
+3. AI can strategize the channels for the ranked/ prioritized accounts taking into consideration the resource availability.
+4. AI voice agents can be used for call follow-ups for the accounts in the high recovery or medium recovery segments.
+5. AI can generate SMS/ call scripts personalized for every account and it's status.
+6. Overall AI can definitely in various aspects enhance decision making and even make the process faster. For example : It can summarize the messy data sets and provide with some initial insights/ protocols to move ahead in the process.
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
